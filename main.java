@@ -5,9 +5,7 @@ import java.net.*;
 import java.util.*;
 import javax.swing.JOptionPane;
 
-//TODO: IF files for Presdient -> Yes or No
-
-public class main {
+public class main{
     static HttpURLConnection connection;
     static BufferedReader reader;
     static String line;
@@ -18,25 +16,21 @@ public class main {
     static StringBuilder possibilities = new StringBuilder();
     static ArrayList<String> tmp = new ArrayList<String>();
 
-
 public static void main(String[] args) {
     getData();
-    //System.out.println(respcon);
-    /*int a = content.indexOf("Will the Senate break legislative filibuster with less than 3/5 support in 2022?");
-    int b = content.indexOf("bestBuyNoCost", a);
-    System.out.println(a);
-    System.out.println(b);
-    System.out.println(content.substring(b+15, b+20));*/
-
     getEvents(responseContent.toString());
     String[] allEvents = ListEvents();
     String selectedEvent = selectEvent(allEvents);
     int eventPosition = getPosition(selectedEvent, allEvents);
     String possibilities = getPossibilities(selectedEvent, allEvents, eventPosition, responseContent.toString());
+    //System.out.println(possibilities);
+    String selectedPossibility = "";
+    if(!possibilities.equals("Yes or No")){
     String[] allPosibilities = listPossibilities(possibilities);
-    System.out.println(allPosibilities[0]);
-    String selectedPossibility = selectPossibilities(allPosibilities);
-    System.out.println(responseContent);
+    selectedPossibility = selectPossibilities(allPosibilities);
+    }
+    getPrices(selectedPossibility, selectedEvent);
+    //System.out.println(responseContent);
     
 }
     static String getData(){
@@ -78,20 +72,6 @@ public static void main(String[] args) {
         return responseContent.toString();
     }
 
-   /*  static void processData(ArrayList<String> content){
-        for(int i = 0; i<content.size(); i++){
-            if(content.get(i).equals("url")){
-                i+=3;
-                while(! content.get(i).equals("url")){
-                    tmp.add(content.get(i));
-                }
-                zd.add(new ArrayList<String>().add(tmp));
-                tmp.clear();
-            }
-        }
-   }*/
-
-
     static void getEvents(String content){
         int counter = 0;
         for(int i = 0; i<=content.length(); i++){
@@ -104,19 +84,16 @@ public static void main(String[] args) {
                 i++;
                 counter++;
                }
-               //System.out.println(events);
                events.append('|');
             }
-            /*else if(content.substring(i,i).equals("?")){
-                //System.out.println(" ");
-            }*/
         }
     }
-
 }
 
     static String[] ListEvents(){
         int counter = 0;
+        int counter1 = 0;
+        int counter2 = 0;
         String[] choices = new String[(int) (events.length() - events.toString().replace("?", "").length())];
         StringBuilder strb = new StringBuilder();
         for(int i = 0; i<events.length(); i++){
@@ -129,8 +106,21 @@ public static void main(String[] args) {
                 strb.setLength(0);
             }
         }
-        //System.out.println(choices[7]);
-        return choices;
+        for(int a = 0; a<choices.length; a++){
+          if(a+1<choices.length){
+            if(choices[a].equals(choices[a+1])){
+            choices[a] = "null";
+          counter1++;}
+          }
+        }
+        String returnChoices[] = new String[choices.length-counter1];
+        for(int b = 0; b<choices.length; b++){
+          if(!choices[b].equals("null")){
+            returnChoices[counter2] = choices[b];
+            counter2++;
+          }
+        }
+        return returnChoices;
     }
 
     static String selectEvent(String[] choices){
@@ -139,7 +129,7 @@ public static void main(String[] args) {
 
     static int getPosition(String item, String[] array){
         for(int i = 0; i<=array.length; i++){
-            if(array[i].equals(item)){
+          if(array[i].equals(item)){
                 return i;
             }
         }
@@ -148,32 +138,30 @@ public static void main(String[] args) {
 
    static String getPossibilities(String selectedEvent, String[] allEvents, int eventPosition, String content){
     StringBuilder strbb = new StringBuilder();
-    int ct = 0;
     int start = content.toString().indexOf(allEvents[eventPosition]);
     int end = content.toString().indexOf(allEvents[eventPosition+1]);
-    for(int i = start; i<=end; i++){
+    for(int i = start; i<=end; i++){if(i+9<content.length()){
         if(content.substring(i, i+9).equals("shortname") || content.substring(i, i+9).equals("Shortname") || content.substring(i, i+9).equals("shortName") || content.substring(i, i+9).equals("ShortName")){
             i+=13;
-               ct=13;
+               
                while(content.charAt(i) != '"'){
                 strbb.append(content.charAt(i));
                 i++;
-                ct++;
                }
-               //System.out.println(events);
                strbb.append('|');
-            }
+            }}
         }
-        if(strbb.toString().equals("")){
-            return "Yes or No";
+        if((strbb.toString().equals("") || (strbb.toString().contains("files for") && !strbb.toString().contains("Democratic")))){
+          return "Yes or No";
         }
-        else{
+        
             if(findI(strbb.toString()) != 0){
             strbb.delete(findI(strbb.toString()), strbb.indexOf("?")+1);
             }
             return strbb.toString();
         }
-   }
+    
+
    static int findI(String str){
     ArrayList<Integer> tmp = new ArrayList<Integer>();
     for(int i = 0; i<str.length(); i++){
@@ -200,13 +188,6 @@ public static void main(String[] args) {
     return count;
    }
    static String[] listPossibilities(String possibilities){
-    if(possibilities.equals("Yes or No")){
-        String[] choices = new String[2];
-        choices[0] = "Yes";
-        choices[1] = "No";
-        return choices;
-    }
-    else{
     String[] choices = new String[numberOfPossibilities(possibilities)];
     int counter = 0;
     StringBuilder strb = new StringBuilder();
@@ -219,11 +200,41 @@ public static void main(String[] args) {
             counter++;
             strb.setLength(0);
         }
-     }
-     return choices;
+     
     }
+    return choices;
 }
     static String selectPossibilities(String[] allPosibilities){
         return (String) JOptionPane.showInputDialog(null, "Select the possibility you would like to analyze", "Selection of Event", JOptionPane.QUESTION_MESSAGE, null, allPosibilities, allPosibilities[0]);
     }
+      
+    static void getPrices(String selectedPossibility, String selectedEvent){
+      int startOneIndex =  responseContent.toString().indexOf(selectedEvent);
+      int yesBuyIndex = 0;
+      int noBuyIndex = 0;
+      int yesSellIndex = 0;
+      int noSellIndex = 0;
+      int isOpenIndex = 0;
+      if (!selectedPossibility.equals("")) {
+        int startTwoIndex = responseContent.toString().indexOf(selectedPossibility, startOneIndex);
+        yesBuyIndex = responseContent.toString().indexOf("bestBuyYesCost", startTwoIndex);
+        noBuyIndex = responseContent.toString().indexOf("bestBuyNoCost", startTwoIndex);
+        yesSellIndex = responseContent.toString().indexOf("bestSellYesCost", startTwoIndex);
+        noSellIndex = responseContent.toString().indexOf("bestSellNoCost", startTwoIndex);
+        isOpenIndex = responseContent.toString().indexOf("status", startTwoIndex);
+      } else {
+        yesBuyIndex = responseContent.toString().indexOf("bestBuyYesCost", startOneIndex);
+        noBuyIndex = responseContent.toString().indexOf("bestBuyNoCost", startOneIndex);
+        yesSellIndex = responseContent.toString().indexOf("bestSellYesCost", startOneIndex);
+        noSellIndex = responseContent.toString().indexOf("bestSellNoCost", startOneIndex);
+        isOpenIndex = responseContent.toString().indexOf("status", startOneIndex);
+      }
+      String status =  responseContent.substring(isOpenIndex+8, isOpenIndex+14);
+      String bestBuyYesCost = responseContent.substring(yesBuyIndex+15, yesBuyIndex+22);
+      String bestBuyNoCost =  responseContent.substring(noBuyIndex+15, noBuyIndex+21); 
+      String bestSellYesCost = responseContent.substring(yesSellIndex+15, yesSellIndex+23);
+      String bestSellNoCost = responseContent.substring(noSellIndex+15, noSellIndex+22);
+      JOptionPane.showMessageDialog(null, "THE BET IS " + status.toUpperCase() + "\n" + "Best Buy Yes Cost is: " + bestBuyYesCost + "\n" + "Best Buy No Cost is: " + bestBuyNoCost + "\n" + "Best sell yes cost is: " + bestSellYesCost + "\n" + "Best sell no cost is:" + bestSellNoCost);
+    }
+    
 }
