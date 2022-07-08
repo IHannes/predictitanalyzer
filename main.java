@@ -161,14 +161,15 @@ public static void main(String[] args) {
                
                while(content.charAt(i) != '"'){
                 strbb.append(content.charAt(i));
+                check.append(content.charAt(i));
                 i++;
                }
                strbb.append('|');
-               System.out.println(strbb);
+               System.out.println(check);
             }}
         }
         //strbb.delete(findI(strbb.toString()), strbb.indexOf("?")+1);
-        if(strbb.toString().equals("") || (strbb.toString().contains("files for") && !strbb.toString().contains("Democratic"))
+        if(strbb.toString().equals("") || (strbb.toString().contains("files for") && !strbb.toString().contains("Democratic")) || check.toString().equals(selectedEvent)
         ){
           return "Yes or No";
         }
