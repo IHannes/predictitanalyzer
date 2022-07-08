@@ -29,3 +29,5 @@ cd predictitanalyzer
 
 ##### When you expect updates do
 git pull
+
+javac main.java
