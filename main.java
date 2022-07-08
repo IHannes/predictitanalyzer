@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
 import javax.swing.JOptionPane;
+import java.lang.Thread;
 
 public class main{
     static HttpURLConnection connection;
@@ -23,15 +24,12 @@ public static void main(String[] args) {
     String selectedEvent = selectEvent(allEvents);
     int eventPosition = getPosition(selectedEvent, allEvents);
     String possibilities = getPossibilities(selectedEvent, allEvents, eventPosition, responseContent.toString());
-    //System.out.println(possibilities);
     String selectedPossibility = "";
     if(!possibilities.equals("Yes or No")){
     String[] allPosibilities = listPossibilities(possibilities);
     selectedPossibility = selectPossibilities(allPosibilities);
     }
     getPrices(selectedPossibility, selectedEvent);
-    //System.out.println(responseContent);
-    
 }
     static String getData(){
         try {
@@ -46,11 +44,26 @@ public static void main(String[] args) {
             System.out.println(status);
     
             if (status> 299){
+                URL[] urls = new URL[15];
+                for(int i=0; i<16; i++){
+                    System.out.println("Trying to connect to predictit API, make sure you have an active Internet connection...");
+                    urls[i] = new URL("https://www.predictit.org/api/marketdata/all/");
+                    connection =(HttpURLConnection) urls[i].openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(2400);
+                    connection.setReadTimeout(2400);
+                    try {
+                        Thread.sleep(10000);
+                    } catch (Exception e) {
+                        System.err.println(e);
+                    }
+                }
+                    
                 reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
                 while((line = reader.readLine()) != null){
                     //respcon.add(line);
                     responseContent.append(line);
-                    responseContent.append("\n");
+                    //responseContent.append("\n");
                 }
                 reader.close();
             }
@@ -138,8 +151,10 @@ public static void main(String[] args) {
 
    static String getPossibilities(String selectedEvent, String[] allEvents, int eventPosition, String content){
     StringBuilder strbb = new StringBuilder();
+    StringBuilder check = new StringBuilder();
     int start = content.toString().indexOf(allEvents[eventPosition]);
-    int end = content.toString().indexOf(allEvents[eventPosition+1]);
+    int end = content.toString().indexOf("timeStamp",start);
+    //System.out.println(content.substring(start, end));
     for(int i = start; i<=end; i++){if(i+9<content.length()){
         if(content.substring(i, i+9).equals("shortname") || content.substring(i, i+9).equals("Shortname") || content.substring(i, i+9).equals("shortName") || content.substring(i, i+9).equals("ShortName")){
             i+=13;
@@ -149,17 +164,16 @@ public static void main(String[] args) {
                 i++;
                }
                strbb.append('|');
+               System.out.println(strbb);
             }}
         }
-        if((strbb.toString().equals("") || (strbb.toString().contains("files for") && !strbb.toString().contains("Democratic")))){
+        //strbb.delete(findI(strbb.toString()), strbb.indexOf("?")+1);
+        if(strbb.toString().equals("") || (strbb.toString().contains("files for") && !strbb.toString().contains("Democratic"))
+        ){
           return "Yes or No";
         }
-        
-            if(findI(strbb.toString()) != 0){
-            strbb.delete(findI(strbb.toString()), strbb.indexOf("?")+1);
-            }
-            return strbb.toString();
-        }
+        return strbb.toString();
+    }
     
 
    static int findI(String str){
@@ -170,10 +184,15 @@ public static void main(String[] args) {
         }
     }
     try {
-        return tmp.get(tmp.size()-2);
+        if(tmp.size()>2){
+        return tmp.get(tmp.size()-2);}
+        else if(tmp.size()==2){
+            return tmp.get(1);
+        }
+        else return tmp.get(0);
     } catch (Exception err) {
     System.err.println(err);
-    return 0;
+        return 0;
     }
 }
 
