@@ -9,7 +9,7 @@ ___
 ##### If not already installed install Git and Java
 [Git](https://git-scm.com/)
 
-[Java](https://www.oracle.com/java/technologies/downloads/#jdk18-windows)
+[Java](https://www.oracle.com/java/technologies/downloads/#jdk18)
 
 ##### Go to Command Line(cmd on Windows) and run the following commands:
 git clone https://github.com/IHannes/predictitanalyzer
