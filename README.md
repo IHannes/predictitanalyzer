@@ -15,9 +15,11 @@ ___
 
 ```
 git clone https://github.com/IHannes/predictitanalyzer
-
+```
+```
 cd predictitanalyzer
-
+```
+```
 javac main.java
 ```
 ___
@@ -32,8 +34,10 @@ java main
 cd predictitanalyzer
 ```
 #### When you expect updates do
+
 ```
 git pull
-
+```
+```
 javac main.java
 ```
